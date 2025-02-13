@@ -31,7 +31,7 @@ ARG WORK_DIR=/app
 WORKDIR ${WORK_DIR}
 
 # Copy the application jar from the build stage
-COPY --from=builder /compiledir/target/movies-0.0.1-SNAPSHOT.jar events.jar
+COPY --from=builder /compiledir/target/movies-0.0.1-SNAPSHOT.jar app.jar
 
 # Copy necessary data files from the builder stage
 COPY --from=builder /app/director_movies_report.jasper ${WORK_DIR}/director_movies_report.jasper
@@ -40,4 +40,4 @@ COPY --from=builder /app/movies_post_2010.zip ${WORK_DIR}/movies_post_2010.zip
 ENV SERVER_PORT=3000
 EXPOSE ${SERVER_PORT}
 
-ENTRYPOINT ["java", "-jar", "events.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
