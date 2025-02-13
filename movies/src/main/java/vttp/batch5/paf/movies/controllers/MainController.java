@@ -30,22 +30,18 @@ public class MainController {
 
     // TODO: Task 3
     @GetMapping("/summary")
-    public ResponseEntity<List<StatsDir>> getAllDirectorsforthelimits(@RequestParam Integer count) {
+    public ResponseEntity<List<StatsDir>> getSummary(@RequestParam Integer count) {
         List<StatsDir> result = movieService.getProlificDirectors(count);
         return ResponseEntity.ok(result);
     }
     // TODO: Task 4
 
     @GetMapping("/summary/pdf")
-    public ResponseEntity<byte[]> generateReport(@RequestParam Integer cout) {
+    public ResponseEntity<byte[]> report(@RequestParam Integer cout) {
         byte[] pdfReport = movieService.generatePDFReport(userName, userBatch, cout);
         if (pdfReport == null) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=Director_Movies_report.pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdfReport);
+        return ResponseEntity.ok().body(pdfReport);
     }
 }
