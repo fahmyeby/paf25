@@ -15,4 +15,4 @@ WORKDIR /
 COPY --from=build /movies/target/movies-0.0.1-SNAPSHOT.jar app.jar
 COPY /data ./data
 
-ENTRYPOINT ["java", "-jar", "app.jar", "--port=3000"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
