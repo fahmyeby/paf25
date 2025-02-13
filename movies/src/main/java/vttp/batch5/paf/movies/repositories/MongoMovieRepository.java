@@ -21,7 +21,7 @@ import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 
 import jakarta.json.JsonObject;
-import vttp.batch5.paf.movies.models.DirectorStats;
+import vttp.batch5.paf.movies.models.StatsDir;
 
 @Repository
 public class MongoMovieRepository {
@@ -140,7 +140,7 @@ public class MongoMovieRepository {
     $limit: 10  
   }
 ])*/
-    public List<DirectorStats> getTopDirectors(Integer limit) {
+    public List<StatsDir> getTopDirectors(Integer limit) {
         Aggregation pipeline = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("directors").ne("")),
                 Aggregation.group("directors").count().as("movies_count"),
@@ -150,9 +150,9 @@ public class MongoMovieRepository {
                 Aggregation.sort(Sort.Direction.DESC, "movies_count"),
                 Aggregation.limit(limit));
         AggregationResults<Document> results = mongoTemplate.aggregate(pipeline, COLLECTION_NAME, Document.class);
-        List<DirectorStats> directors = new ArrayList<>();
+        List<StatsDir> directors = new ArrayList<>();
         for (Document doc : results.getMappedResults()) {
-            DirectorStats stats = new DirectorStats(
+            StatsDir stats = new StatsDir(
                     doc.getString("director_name"),
                     doc.getInteger("movies_count"),
                     0.0,

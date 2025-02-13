@@ -40,9 +40,4 @@ EXPOSE ${SERVER_PORT}
 # Command to run the application
 ENTRYPOINT ["java", "-jar", "events.jar"]
 
-# run
-# docker build -t cihansifan/anyname:v0.0.1 .
-
-# container
-# docker run -p 8085:8080 cihansifan/anyname:v0.0.1
 
