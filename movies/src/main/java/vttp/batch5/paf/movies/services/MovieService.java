@@ -36,7 +36,6 @@ public class MovieService {
     private MySQLMovieRepository mysqlRepo;
 
     // TODO: Task 2
-    //All done in DataLoader.class
     // TODO: Task 3
     // You may change the signature of this method by passing any number of parameters
     // and returning any type
