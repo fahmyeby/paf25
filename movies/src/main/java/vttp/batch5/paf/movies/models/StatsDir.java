@@ -1,7 +1,6 @@
 package vttp.batch5.paf.movies.models;
 
 public class StatsDir {
-
     private String director_name;
     private Integer Movies_count;
     private Double total_revenue;
@@ -13,7 +12,6 @@ public class StatsDir {
 
     public StatsDir(String director_name, Integer movies_count, Double total_revenue, Double total_budget,
             Double profit_loss) {
-
         this.director_name = director_name;
         Movies_count = movies_count;
         this.total_revenue = total_revenue;
