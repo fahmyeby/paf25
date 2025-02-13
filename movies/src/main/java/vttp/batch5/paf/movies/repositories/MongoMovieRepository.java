@@ -29,9 +29,38 @@ public class MongoMovieRepository {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    private static final String COLLECTION_NAME = "imdb";
-    private static final String ERROR_COLLECTION = "errors";
+    // parse to mongo doc
+    private Document toMongoDocument(JsonObject movie) {
+      Document doc = new Document();
+      doc.put("imdb_id", getStringValue(movie, "imdb_id"));
+      doc.put("title", getStringValue(movie, "title"));
+      doc.put("director", getStringValue(movie, "director"));
+      doc.put("overview", getStringValue(movie, "overview"));
+      doc.put("tagline", getStringValue(movie, "tagline"));
+      doc.put("genres", getStringValue(movie, "genres"));
+      doc.put("imdb_rating", getDoubleValue(movie, "imdb_rating"));
+      doc.put("imdb_votes", getIntValue(movie, "imdb_votes"));
+      return doc;
+  }
 
+  // helper get methods
+  private String getStringValue(JsonObject json, String key) {
+      return json.containsKey(key) && !json.isNull(key)
+              ? json.getString(key)
+              : "";
+  }
+
+  private double getDoubleValue(JsonObject json, String key) {
+      return json.containsKey(key) && !json.isNull(key)
+              ? json.getJsonNumber(key).doubleValue()
+              : 0.0;
+  }
+
+  private int getIntValue(JsonObject json, String key) {
+      return json.containsKey(key) && !json.isNull(key)
+              ? json.getJsonNumber(key).intValue()
+              : 0;
+  }
     // TODO: Task 2.3
     // You can add any number of parameters and return any type from the method
     // You can throw any checked exceptions from the method
@@ -61,7 +90,7 @@ public class MongoMovieRepository {
                 .toList();
         if (!writes.isEmpty()) {
             try {
-                mongoTemplate.getCollection(COLLECTION_NAME)
+                mongoTemplate.getCollection("imdb")
                         .bulkWrite(writes);
             } catch (Exception e) {
                 logError(movies.stream()
@@ -78,13 +107,13 @@ public class MongoMovieRepository {
     }
 
     private void checkCollectionAndIndex() {
-        if (!mongoTemplate.collectionExists(COLLECTION_NAME)) {
-            mongoTemplate.createCollection(COLLECTION_NAME);
+        if (!mongoTemplate.collectionExists("imdb")) {
+            mongoTemplate.createCollection("imdb");
         }
-        if (!mongoTemplate.collectionExists(ERROR_COLLECTION)) {
-            mongoTemplate.createCollection(ERROR_COLLECTION);
+        if (!mongoTemplate.collectionExists("error")) {
+            mongoTemplate.createCollection("error");
         }
-        IndexOperations indexOps = mongoTemplate.indexOps(COLLECTION_NAME);
+        IndexOperations indexOps = mongoTemplate.indexOps("imdb");
         IndexDefinition indexDefinition = new Index()
                 .on("imdb_id", Sort.Direction.ASC)
                 .unique();
@@ -109,7 +138,7 @@ public class MongoMovieRepository {
                 .append("ids", imdbIds)
                 .append("error", ex.getMessage())
                 .append("timestamp", new Date());
-        mongoTemplate.getCollection(ERROR_COLLECTION).insertOne(errorDoc);
+        mongoTemplate.getCollection("error").insertOne(errorDoc);
     }
 
     // TODO: Task 3
@@ -141,7 +170,7 @@ public class MongoMovieRepository {
   }
 ])*/
     public List<StatsDir> getTopDirectors(Integer limit) {
-        Aggregation pipeline = Aggregation.newAggregation(
+        Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("directors").ne("")),
                 Aggregation.group("directors").count().as("movies_count"),
                 Aggregation.project()
@@ -149,7 +178,7 @@ public class MongoMovieRepository {
                         .andExpression("movies_count").as("movies_count"),
                 Aggregation.sort(Sort.Direction.DESC, "movies_count"),
                 Aggregation.limit(limit));
-        AggregationResults<Document> results = mongoTemplate.aggregate(pipeline, COLLECTION_NAME, Document.class);
+        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "imdb", Document.class);
         List<StatsDir> directors = new ArrayList<>();
         for (Document doc : results.getMappedResults()) {
             StatsDir stats = new StatsDir(
@@ -164,47 +193,16 @@ public class MongoMovieRepository {
     }
 
     // db.imdb.find(
-    // { "directors": "Director Name" },
-    // { "imdb_id": 1, "_id": 0 })
+    // { "directors": "<name>" },
+    // { "imdb_id": <imdb id>, "_id": <ObjectId> })
     public List<String> getMovieIdsByDirector(String directorName) {
-        Query query = Query.query(
-                Criteria.where("directors").is(directorName)
-        );
+        Query query = Query.query(Criteria.where("directors").is(directorName));
         query.fields().include("imdb_id");
-        return mongoTemplate.find(query, Document.class, COLLECTION_NAME)
+        return mongoTemplate.find(query, Document.class, "imdb")
                 .stream()
                 .map(doc -> doc.getString("imdb_id"))
                 .toList();
     }
 
-    private Document toMongoDocument(JsonObject movie) {
-        Document doc = new Document();
-        doc.put("imdb_id", getStringValue(movie, "imdb_id"));
-        doc.put("title", getStringValue(movie, "title"));
-        doc.put("director", getStringValue(movie, "director"));
-        doc.put("overview", getStringValue(movie, "overview"));
-        doc.put("tagline", getStringValue(movie, "tagline"));
-        doc.put("genres", getStringValue(movie, "genres"));
-        doc.put("imdb_rating", getDoubleValue(movie, "imdb_rating"));
-        doc.put("imdb_votes", getIntValue(movie, "imdb_votes"));
-        return doc;
-    }
-
-    private String getStringValue(JsonObject json, String key) {
-        return json.containsKey(key) && !json.isNull(key)
-                ? json.getString(key)
-                : "";
-    }
-
-    private double getDoubleValue(JsonObject json, String key) {
-        return json.containsKey(key) && !json.isNull(key)
-                ? json.getJsonNumber(key).doubleValue()
-                : 0.0;
-    }
-
-    private int getIntValue(JsonObject json, String key) {
-        return json.containsKey(key) && !json.isNull(key)
-                ? json.getJsonNumber(key).intValue()
-                : 0;
-    }
+    
 }

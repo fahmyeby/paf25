@@ -30,7 +30,38 @@ public class MySQLMovieRepository {
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """;
 
-    private Set<String> processedIds = new HashSet<>();
+    private Set<String> ids = new HashSet<>();
+    // parse to object
+    private Object[] getMovieData(JsonObject movie) {
+        return new Object[]{
+            getStringValue(movie, "imdb_id"),
+            getDoubleValue(movie, "vote_average"),
+            getIntValue(movie, "vote_count"),
+            Date.valueOf(getStringValue(movie, "release_date")),
+            getDoubleValue(movie, "revenue"),
+            getDoubleValue(movie, "budget"),
+            getIntValue(movie, "runtime")
+        };
+    }
+
+    // helper methods
+    private String getStringValue(JsonObject json, String key) {
+        return json.containsKey(key) && !json.isNull(key)
+                ? json.getString(key)
+                : "";
+    }
+
+    private double getDoubleValue(JsonObject json, String key) {
+        return json.containsKey(key) && !json.isNull(key)
+                ? json.getJsonNumber(key).doubleValue()
+                : 0.0;
+    }
+
+    private int getIntValue(JsonObject json, String key) {
+        return json.containsKey(key) && !json.isNull(key)
+                ? json.getJsonNumber(key).intValue()
+                : 0;
+    }
 
     // TODO: Task 2.3
     // You can add any number of parameters and return any type from the method
@@ -40,20 +71,20 @@ public class MySQLMovieRepository {
             List<JsonObject> uniqueMovies = movies.stream()
                     .filter(movie -> {
                         String imdbId = getStringValue(movie, "imdb_id");
-                        if (processedIds.contains(imdbId)) {
+                        if (ids.contains(imdbId)) {
                             return false;
                         }
-                        processedIds.add(imdbId);
+                        ids.add(imdbId);
                         return true;
                     })
                     .collect(Collectors.toList());
             if (uniqueMovies.isEmpty()) {
                 return;
             }
-            List<Object[]> batchParams = uniqueMovies.stream()
-                    .map(this::extractMovieParams)
+            List<Object[]> param = uniqueMovies.stream()
+                    .map(this::getMovieData)
                     .collect(Collectors.toList());
-            jdbcTemplate.batchUpdate(SQL_INSERT_MOVIE, batchParams);
+            jdbcTemplate.batchUpdate(SQL_INSERT_MOVIE, param);
             mongoRepo.batchInsertMovies(uniqueMovies);
         } catch (Exception ex) {
             List<String> failedIds = movies.stream()
@@ -64,13 +95,6 @@ public class MySQLMovieRepository {
         }
     }
     // TODO: Task 3
-/*
-    SELECT 
-    IFNULL(SUM(revenue), 0) as total_revenue,
-    IFNULL(SUM(budget), 0) as total_budget
-    FROM imdb
-    WHERE imdb_id IN ('<movie_ids>')
-     */
     public StatsDir getDirectorFinancials(List<String> movieIds) {
         if (movieIds.isEmpty()) {
             return new StatsDir(null, 0, 0.0, 0.0, 0.0);
@@ -94,33 +118,6 @@ public class MySQLMovieRepository {
         } catch (Exception e) {
             return new StatsDir(null, 0, 0.0, 0.0, 0.0);
         }
-    }    private Object[] extractMovieParams(JsonObject movie) {
-        return new Object[]{
-            getStringValue(movie, "imdb_id"),
-            getDoubleValue(movie, "vote_average"),
-            getIntValue(movie, "vote_count"),
-            Date.valueOf(getStringValue(movie, "release_date")),
-            getDoubleValue(movie, "revenue"),
-            getDoubleValue(movie, "budget"),
-            getIntValue(movie, "runtime")
-        };
-    }
-
-    private String getStringValue(JsonObject json, String key) {
-        return json.containsKey(key) && !json.isNull(key)
-                ? json.getString(key)
-                : "";
-    }
-
-    private double getDoubleValue(JsonObject json, String key) {
-        return json.containsKey(key) && !json.isNull(key)
-                ? json.getJsonNumber(key).doubleValue()
-                : 0.0;
-    }
-
-    private int getIntValue(JsonObject json, String key) {
-        return json.containsKey(key) && !json.isNull(key)
-                ? json.getJsonNumber(key).intValue()
-                : 0;
-    }
+    }   
+     
 }

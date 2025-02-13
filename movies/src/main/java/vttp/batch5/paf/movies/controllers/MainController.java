@@ -36,16 +36,16 @@ public class MainController {
     }
     // TODO: Task 4
 
-    /* @GetMapping("/summary/pdf")
-    public ResponseEntity<byte[]> generateReport(@RequestParam Integer count) {
-        byte[] pdfReport = movieService.generatePDFReport(userName, userBatch, count);
+    @GetMapping("/summary/pdf")
+    public ResponseEntity<byte[]> generateReport(@RequestParam Integer cout) {
+        byte[] pdfReport = movieService.generatePDFReport(userName, userBatch, cout);
         if (pdfReport == null) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=Director_Movies_report.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfReport);
-    } */
+    }
 }

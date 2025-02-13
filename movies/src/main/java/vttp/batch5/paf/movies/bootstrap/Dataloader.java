@@ -1,8 +1,6 @@
 package vttp.batch5.paf.movies.bootstrap;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -40,21 +38,22 @@ public class Dataloader implements CommandLineRunner {
     //TODO: Task 2
     @Override
     public void run(String... args) throws Exception {
-        if (!isDataLoaded()) {
+        if (!dataLoaded()) {
             loadData();
         }
     }
 
-    private boolean isDataLoaded() {
+    private boolean dataLoaded() {
         try {
-            Long mysqlCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM imdb", Long.class);
+            String sql = "select count(*) from imdb";
+            Long mysqlCount = jdbcTemplate.queryForObject(sql, Long.class);
             if (mysqlCount != null && mysqlCount > 0) {
                 return true;
             }
         } catch (Exception e) {
         }
         try {
-            long mongoCount = mongoTemplate.getCollection("movies").countDocuments();
+            long mongoCount = mongoTemplate.getCollection("imdb").countDocuments();
             return mongoCount > 0;
         } catch (Exception e) {
             return false;
@@ -64,12 +63,6 @@ public class Dataloader implements CommandLineRunner {
   private void loadData() {
         try {
             ClassPathResource resource = new ClassPathResource("data/movies_post_2010.zip");
-            if (!resource.exists()) {
-                throw new RuntimeException("Required file not found in classpath: data/movies_post_2010.zip");
-            }
-
-            System.out.println("Loading data from classpath: " + resource.getPath());
-
             try (InputStream is = resource.getInputStream();
                  ZipInputStream zipIn = new ZipInputStream(is)) {
                 
@@ -105,7 +98,6 @@ public class Dataloader implements CommandLineRunner {
                 if (checkReleaseDate(releaseDateStr)) {
                     currentBatch.add(movieObj);
                     if (currentBatch.size() == 25) {
-                        System.out.println("Processing batch of 25 movies");
                         processBatch(currentBatch);
                         currentBatch.clear();
                     }
@@ -113,7 +105,7 @@ public class Dataloader implements CommandLineRunner {
             }
             lineCount++;
             if (lineCount % 100 == 0) {
-                System.out.println("Processed " + lineCount + " lines");
+                System.out.println("Processed: " + lineCount + " lines");
             }
         }
     }
