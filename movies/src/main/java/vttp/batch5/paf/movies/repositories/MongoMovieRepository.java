@@ -55,7 +55,7 @@ public class MongoMovieRepository {
     }])
      */
     public void batchInsertMovies(List<JsonObject> movies) {
-        ensureCollectionAndIndex();
+        checkCollectionAndIndex();
         List<WriteModel<Document>> writes = movies.stream()
                 .map(this::insertModel)
                 .toList();
@@ -77,7 +77,7 @@ public class MongoMovieRepository {
         return new InsertOneModel<Document>(doc);
     }
 
-    private void ensureCollectionAndIndex() {
+    private void checkCollectionAndIndex() {
         if (!mongoTemplate.collectionExists(COLLECTION_NAME)) {
             mongoTemplate.createCollection(COLLECTION_NAME);
         }
