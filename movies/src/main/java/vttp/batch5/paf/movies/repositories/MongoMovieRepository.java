@@ -57,7 +57,7 @@ public class MongoMovieRepository {
     public void batchInsertMovies(List<JsonObject> movies) {
         ensureCollectionAndIndex();
         List<WriteModel<Document>> writes = movies.stream()
-                .map(this::createInsertModel)
+                .map(this::insertModel)
                 .toList();
         if (!writes.isEmpty()) {
             try {
@@ -72,8 +72,8 @@ public class MongoMovieRepository {
         }
     }
 
-    private WriteModel<Document> createInsertModel(JsonObject movie) {
-        Document doc = convertToMongoDocument(movie);
+    private WriteModel<Document> insertModel(JsonObject movie) {
+        Document doc = toMongoDocument(movie);
         return new InsertOneModel<Document>(doc);
     }
 
@@ -177,8 +177,7 @@ public class MongoMovieRepository {
                 .toList();
     }
 
-    // helper method for task 2
-    private Document convertToMongoDocument(JsonObject movie) {
+    private Document toMongoDocument(JsonObject movie) {
         Document doc = new Document();
         doc.put("imdb_id", getStringValue(movie, "imdb_id"));
         doc.put("title", getStringValue(movie, "title"));

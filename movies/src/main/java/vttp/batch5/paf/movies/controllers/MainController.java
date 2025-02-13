@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import vttp.batch5.paf.movies.models.DirectorStats;
+import vttp.batch5.paf.movies.models.StatsDir;
 import vttp.batch5.paf.movies.services.MovieService;
 
 @RestController
@@ -30,13 +30,13 @@ public class MainController {
 
     // TODO: Task 3
     @GetMapping("/summary")
-    public ResponseEntity<List<DirectorStats>> getAllDirectorsforthelimits(@RequestParam Integer count) {
-        List<DirectorStats> result = movieService.getProlificDirectors(count);
+    public ResponseEntity<List<StatsDir>> getAllDirectorsforthelimits(@RequestParam Integer count) {
+        List<StatsDir> result = movieService.getProlificDirectors(count);
         return ResponseEntity.ok(result);
     }
     // TODO: Task 4
 
-    @GetMapping("/summary/pdf")
+    /* @GetMapping("/summary/pdf")
     public ResponseEntity<byte[]> generateReport(@RequestParam Integer count) {
         byte[] pdfReport = movieService.generatePDFReport(userName, userBatch, count);
         if (pdfReport == null) {
@@ -47,5 +47,5 @@ public class MainController {
                         "attachment; filename=Director_Movies_report.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfReport);
-    }
+    } */
 }

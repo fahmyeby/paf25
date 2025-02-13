@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.json.JsonObject;
-import vttp.batch5.paf.movies.models.DirectorStats;
+import vttp.batch5.paf.movies.models.StatsDir;
 
 @Repository
 public class MySQLMovieRepository {
@@ -71,9 +71,9 @@ public class MySQLMovieRepository {
     FROM imdb
     WHERE imdb_id IN ('<movie_ids>')
      */
-    public DirectorStats getDirectorFinancials(List<String> movieIds) {
+    public StatsDir getDirectorFinancials(List<String> movieIds) {
         if (movieIds.isEmpty()) {
-            return new DirectorStats(null, 0, 0.0, 0.0, 0.0);
+            return new StatsDir(null, 0, 0.0, 0.0, 0.0);
         }
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT IFNULL(SUM(revenue), 0) as total_revenue, ");
@@ -90,14 +90,11 @@ public class MySQLMovieRepository {
             Map<String, Object> result = jdbcTemplate.queryForMap(sqlBuilder.toString());
             Double revenue = ((Number) result.get("total_revenue")).doubleValue();
             Double budget = ((Number) result.get("total_budget")).doubleValue();
-            return new DirectorStats(null, movieIds.size(), revenue, budget, revenue - budget);
+            return new StatsDir(null, movieIds.size(), revenue, budget, revenue - budget);
         } catch (Exception e) {
-            return new DirectorStats(null, 0, 0.0, 0.0, 0.0);
+            return new StatsDir(null, 0, 0.0, 0.0, 0.0);
         }
-    }
-
-    //helper method for task 2 
-    private Object[] extractMovieParams(JsonObject movie) {
+    }    private Object[] extractMovieParams(JsonObject movie) {
         return new Object[]{
             getStringValue(movie, "imdb_id"),
             getDoubleValue(movie, "vote_average"),

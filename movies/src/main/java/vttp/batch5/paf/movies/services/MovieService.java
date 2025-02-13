@@ -22,7 +22,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.json.data.JsonDataSource;
-import vttp.batch5.paf.movies.models.DirectorStats;
+import vttp.batch5.paf.movies.models.StatsDir;
 import vttp.batch5.paf.movies.repositories.MongoMovieRepository;
 import vttp.batch5.paf.movies.repositories.MySQLMovieRepository;
 
@@ -40,11 +40,11 @@ public class MovieService {
     // TODO: Task 3
     // You may change the signature of this method by passing any number of parameters
     // and returning any type
-    public List<DirectorStats> getProlificDirectors(Integer count) {
-        List<DirectorStats> directors = mongoRepo.getTopDirectors(count);
-        for (DirectorStats director : directors) {
+    public List<StatsDir> getProlificDirectors(Integer count) {
+        List<StatsDir> directors = mongoRepo.getTopDirectors(count);
+        for (StatsDir director : directors) {
             List<String> movieIds = mongoRepo.getMovieIdsByDirector(director.getDirector_name());
-            DirectorStats financials = mysqlRepo.getDirectorFinancials(movieIds);
+            StatsDir financials = mysqlRepo.getDirectorFinancials(movieIds);
             Integer movieCount = director.getMovies_count();
             director.setTotal_revenue(financials.getTotal_revenue());
             director.setTotal_budget(financials.getTotal_budget());
@@ -58,15 +58,15 @@ public class MovieService {
     // TODO: Task 4
     // You may change the signature of this method by passing any number of parameters
     // and returning any type
-    public byte[] generatePDFReport(String userName, String userBatch, Integer count) {
+    /* public byte[] generatePDFReport(String userName, String userBatch, Integer count) {
         try {
-            List<DirectorStats> directors = getProlificDirectors(count);
+            List<StatsDir> directors = getProlificDirectors(count);
             JsonObjectBuilder reportBuilder = Json.createObjectBuilder();
             reportBuilder.add("name", userName);
             reportBuilder.add("batch", userBatch);
             JsonObject reportData = reportBuilder.build();
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-            for (DirectorStats director : directors) {
+            for (StatsDir director : directors) {
                 JsonObjectBuilder directorBuilder = Json.createObjectBuilder();
                 directorBuilder.add("director", director.getDirector_name());
                 directorBuilder.add("count", director.getMovies_count());
@@ -93,5 +93,5 @@ public class MovieService {
             e.printStackTrace();
             return null;
         }
-    }
+    } */
 }
