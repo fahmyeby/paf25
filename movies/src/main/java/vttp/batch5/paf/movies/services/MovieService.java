@@ -54,10 +54,10 @@ public class MovieService {
         return directors;
     }
 
-    // TODO: Task 4
+     // TODO: Task 4
     // You may change the signature of this method by passing any number of parameters
     // and returning any type
-    /* public byte[] generatePDFReport(String userName, String userBatch, Integer count) {
+     public byte[] generatePDFReport(String userName, String userBatch, Integer count) {
         try {
             List<StatsDir> directors = getProlificDirectors(count);
             JsonObjectBuilder reportBuilder = Json.createObjectBuilder();
@@ -92,5 +92,5 @@ public class MovieService {
             e.printStackTrace();
             return null;
         }
-    } */
+    } 
 }
